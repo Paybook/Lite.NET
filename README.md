@@ -90,7 +90,7 @@
 * **Sample Call:**
 
  ```curl
-  curl http://<_your_ip_>:5000/api/User/login?username=[someusername]&password=[somepassword]
+  http://<_your_ip_>:5000/api/User/login?username=[someusername]&password=[somepassword]
  ```
 
 **Catalogs**
@@ -123,7 +123,7 @@
 * **Sample Call:**
 
  ```
-  curl http://<_your_ip_>:5000/api/catalogs/get?token=[yourtoken]
+  http://<_your_ip_>:5000/api/catalogs/get?token=[yourtoken]
   ```
 
 **Credentials**
@@ -174,7 +174,7 @@
 	credentials parameter is an example, but it is dinamyc according to institution
 	
 	 ```
-     curl http://<_your_ip_>:5000/api/credentials/credentials
+     http://<_your_ip_>:5000/api/credentials/credentials
      ```
   ```
 
@@ -209,8 +209,7 @@
 * **Sample Call:**
 
  ```
-  curl http://<_your_ip_>:5000/api/credentials/status?token=sometoken
-' http://127.0.0.1:5000/status
+   http://<_your_ip_>:5000/api/credentials/status?token=sometoken
   ```
   
 **Accounts**
@@ -244,7 +243,7 @@
 * **Sample Call:**
 
  ```
-  curl http://<_your_ip_>:5000/api/accounts/accounts?token=sometoken&id_site=someidsite
+  http://<_your_ip_>:5000/api/accounts/accounts?token=sometoken&id_site=someidsite
   ```
   
 **Transactions**
@@ -278,6 +277,6 @@
 * **Sample Call:**
 
  ```
- curl http://<_your_ip_>:5000/api/transactions/transactions?token=sometoken&id_account=someidaccount
+ http://<_your_ip_>:5000/api/transactions/transactions?token=sometoken&id_account=someidaccount
 
   ```

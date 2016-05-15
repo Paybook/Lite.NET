@@ -98,70 +98,91 @@ namespace pb_net_api.PayBookCalls
             }
         }
 
-        //public JObject credentials(string token, string id_site, string id_user, string credentials_user, string credentials_password)
-        public JObject credentials(string token, string name, string id_site, string[] credentials_user)
+        public JObject credentials(JObject newcredentials)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(paybook_link + "credentials");
-            request.Method = "POST";
-
-            System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
-
-            data2 data = new data2() { token = token, name = name, id_site = id_site, credentials = credentials_user };
-            string jsonContent = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(data);
-
-            Byte[] byteArray = encoding.GetBytes(jsonContent);
-
-            request.ContentLength = byteArray.Length;
-            request.ContentType = @"application/json";
-
-            using (Stream dataStream = request.GetRequestStream())
+            using (var client = new HttpClient())
             {
-                dataStream.Write(byteArray, 0, byteArray.Length);
-            }
-            long length = 0;
-            try
-            {
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                client.BaseAddress = new Uri(paybook_link);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+               
+                HttpResponseMessage response = client.PostAsync("credentials", new StringContent(newcredentials.ToString(), Encoding.UTF8, "application/json")).Result;
+
+                if (response.IsSuccessStatusCode)
                 {
-                    length = response.ContentLength;
+                    string respon = response.Content.ReadAsStringAsync().Result;
+                    JObject user = JObject.Parse(respon);
+                    return (JObject)user["response"];
                 }
+                else
+                    return null;
             }
-            catch (WebException ex)
+        }
+
+        public string status(string token, string id_site, string url_status)
+        {
+            using (var client = new HttpClient())
             {
-                // Log exception and throw as for GET example above
+                client.BaseAddress = new Uri(paybook_link);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string parameters = url_status + "?token=" + token + "&id_site=" + id_site;
+
+                HttpResponseMessage response = client.GetAsync(parameters).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string respon = response.Content.ReadAsStringAsync().Result;
+                    JObject credentials = JObject.Parse(respon);
+                    return credentials["response"].ToString();
+                }
+                else
+                    return string.Empty;
             }
-            return null;
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri(paybook_link);
-            //    client.DefaultRequestHeaders.Accept.Clear();
-            //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //    //client.DefaultRequestHeaders.AcceptCharset.Add(new StringWithQualityHeaderValue("utf-8"));
-            //    // HTTP POST
-            //    //data2 data = new data2() { api_key = api_key, id_user = id_user, id_site = id_site, credentials = new credentials { username = credentials_user, password = credentials_password } };
+        }
 
-            //    //string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(data);
+        public string accounts(string token, string id_site)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(paybook_link);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            //    data2 data = new data2() { token = token, name = name, id_site = id_site, credentials = new credentials { username = credentials_user, password = credentials_password } };
-            //    //HttpResponseMessage response = client.PostAsJsonAsync("credentials", data).Result;
+                string parameters = "accounts?token=" + token + "&id_site=" + id_site;
 
-            //    //HttpResponseMessage response = client.PostAsJsonAsync("credentials", data).Result;
-            //    //HttpResponseMessage response = client.PostAsJsonAsync("credentials", new StringContent(json, Encoding.UTF8, "application/json")).Result;
+                HttpResponseMessage response = client.GetAsync(parameters).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string respon = response.Content.ReadAsStringAsync().Result;
+                    JObject credentials = JObject.Parse(respon);
+                    return credentials["response"].ToString();
+                }
+                else
+                    return string.Empty;
+            }
+        }
 
-            //    string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(data);
+        public string transactions(string token, string id_account)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(paybook_link);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            //    //string parameters = @"credentials?token=" + token + "&name="+name+"&id_site="+id_site+"&credentials%5Busername%5D="+credentials_user+"&credentials%5Bpassword%5D="+credentials_password;
-            //    HttpResponseMessage response = client.PostAsync("credentials", new StringContent(json, Encoding.UTF8, "application/json")).Result;
+                string parameters = "transactions?token=" + token + "&id_account=" + id_account;
 
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        string respon = response.Content.ReadAsStringAsync().Result;
-            //        JObject user = JObject.Parse(respon);
-            //        return (JObject)user["response"];
-            //    }
-            //    else
-            //        return null;
-            //}
+                HttpResponseMessage response = client.GetAsync(parameters).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    string respon = response.Content.ReadAsStringAsync().Result;
+                    JObject credentials = JObject.Parse(respon);
+                    return credentials["response"].ToString();
+                }
+                else
+                    return string.Empty;
+            }
         }
     }
 
@@ -181,23 +202,5 @@ namespace pb_net_api.PayBookCalls
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string id_site { get; set; }
-    }
-
-    public class data2
-    {
-        public string token { get; set; }
-
-        public string name { get; set; }
-
-        public string id_site { get; set; }
-
-        public string [] credentials { get; set; }
-    }
-
-    public class credentials
-    {
-        public string username { get; set; }
-
-        public string password { get; set; }
     }
 }

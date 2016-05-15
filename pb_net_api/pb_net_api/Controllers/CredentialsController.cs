@@ -15,28 +15,30 @@ namespace pb_net_api.Controllers
     {
         // POST: api/Credentials/credentials
         [System.Web.Http.HttpPost]
-        //public HttpResponseMessage credentials(string token, string id_site, string credentials_user, string credentials_password)
-        public HttpResponseMessage credentials(string token, string name, string id_site, string [] credentials_user)
+        public HttpResponseMessage credentials(JObject credentials)
         {
-            string credentials = "false";
+            string credentialsResponse = "false";
             PayBookEntities entities = new PayBookEntities();
 
+            string token = credentials["token"].ToObject<string>();
+            string id_site = credentials["id_site"].ToObject<string>();
+            
             var user = entities.users.FirstOrDefault(u => u.token == token);
 
             if (user != null)
             {
                 Paybook paybook = new Paybook();
-                JObject new_credentials = paybook.credentials(token, name, id_site, credentials_user);
+                JObject new_credentials = paybook.credentials(credentials);
 
                 if (new_credentials != null)
                 {
-                    entities.credentials.Add(new EFModels.credentials { ws = new_credentials["ws"].ToString(), status = new_credentials["status"].ToString(), twofa = new_credentials["twofa"].ToString(), id_credential = new_credentials["id_credential"].ToString() });
+                    entities.credentials.Add(new EFModels.credentials { id_user = user.id_user, id_site = id_site, ws = new_credentials["ws"].ToString(), status = new_credentials["status"].ToString(), twofa = new_credentials["twofa"].ToString(), id_credential = new_credentials["id_credential"].ToString() });
                     entities.SaveChanges();
-                    credentials = new_credentials.ToString();
+                    credentialsResponse = new_credentials.ToString();
                 }
             }
 
-            JToken json = JObject.Parse("{ 'credentials' : '" + credentials + "' }");
+            JToken json = JObject.Parse("{ 'credentials' : '" + credentialsResponse + "' }");
             return new HttpResponseMessage()
             {
                 Content = new JsonContent(json)
@@ -47,12 +49,22 @@ namespace pb_net_api.Controllers
         [System.Web.Http.HttpGet]
         public HttpResponseMessage Status(string token, string id_site)
         {
-            string catalogs = "";
-            Paybook paybook = new Paybook();
+            string status = "false";
+            
+            PayBookEntities entities = new PayBookEntities();
 
-            catalogs = paybook.catalogs(token);
+            var user = entities.users.FirstOrDefault(u => u.token == token);
 
-            JToken json = JObject.Parse("{ 'catalogs' : '" + catalogs + "' }");
+            if (user != null)
+            {
+                var credentials = entities.credentials.FirstOrDefault(c => c.id_user == user.id_user && c.id_site == id_site);
+                string url_status = credentials.status;
+
+                Paybook paybook = new Paybook();
+                status = paybook.status(token, id_site, url_status);
+            }
+
+            JToken json = JObject.Parse("{ 'status' : '" + status + "' }");
             return new HttpResponseMessage()
             {
                 Content = new JsonContent(json)

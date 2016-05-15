@@ -7,12 +7,17 @@
       <appSettings >
         <add key="API_KEY" value="YOUR_API_KEY_GOES_HERE" />
 	  </appSettings >
-
+	  
+  Set up your SQLite database into AppData folder
+      paybook.db
+  
 **Prerequisites**
 ----
     -- Visual Studio 2015
     -- Microsoft .NET Framework 4.6
     -- Your server must have support for WEB API
+	-- Entity Framework 6 
+	-- All data tables must have at least one primary key in order to use Entity Framework 6
 
 **Execution from Source code**
 ----

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using pb_net_api.EFModels;
-using pb_net_api.PayBookCalls;
+using PaybookSDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,15 +13,20 @@ namespace pb_net_api.Controllers
 {
     public class AccountsController : ApiController
     {
-        // GET: api/Accounts/accounts
+        // GET: api/Accounts/Get
         [System.Web.Http.HttpGet]
-        public HttpResponseMessage accounts(string token, string id_site)
+        public HttpResponseMessage Get(string token, string id_site)
         {
             string accounts = "";
-
-            Paybook paybook = new Paybook();
-            accounts = paybook.accounts(token, id_site);
-
+            try
+            {
+                Paybook paybook = new Paybook();
+                accounts = paybook.accounts(token, id_site);
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
             JToken json = JObject.Parse("{ 'accounts' : '" + accounts + "' }");
             return new HttpResponseMessage()
             {

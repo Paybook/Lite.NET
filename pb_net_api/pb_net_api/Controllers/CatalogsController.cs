@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using pb_net_api.EFModels;
-using pb_net_api.PayBookCalls;
+using PaybookSDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,10 +18,16 @@ namespace pb_net_api.Controllers
         public HttpResponseMessage Get(string token)
         {
             string catalogs = "";
-            Paybook paybook = new Paybook();
+            try
+            {
+                Paybook paybook = new Paybook();
 
-            catalogs = paybook.catalogs(token);
-
+                catalogs = paybook.catalogs(token);
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
             JToken json = JObject.Parse("{ 'catalogs' : '" + catalogs + "' }");
             return new HttpResponseMessage()
             {

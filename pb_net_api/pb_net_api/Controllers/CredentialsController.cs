@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using pb_net_api.EFModels;
-using pb_net_api.PayBookCalls;
+using PaybookSDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,31 +13,37 @@ namespace pb_net_api.Controllers
 {
     public class CredentialsController : ApiController
     {
-        // POST: api/Credentials/credentials
+        // POST: api/Credentials/Register
         [System.Web.Http.HttpPost]
-        public HttpResponseMessage credentials(JObject credentials)
+        public HttpResponseMessage Register(JObject credentials)
         {
             string credentialsResponse = "false";
-            PayBookEntities entities = new PayBookEntities();
-
-            string token = credentials["token"].ToObject<string>();
-            string id_site = credentials["id_site"].ToObject<string>();
-            
-            var user = entities.users.FirstOrDefault(u => u.token == token);
-
-            if (user != null)
+            try
             {
-                Paybook paybook = new Paybook();
-                JObject new_credentials = paybook.credentials(credentials);
+                PayBookEntities entities = new PayBookEntities();
 
-                if (new_credentials != null)
+                string token = credentials["token"].ToObject<string>();
+                string id_site = credentials["id_site"].ToObject<string>();
+
+                var user = entities.users.FirstOrDefault(u => u.token == token);
+
+                if (user != null)
                 {
-                    entities.credentials.Add(new EFModels.credentials { id_user = user.id_user, id_site = id_site, ws = new_credentials["ws"].ToString(), status = new_credentials["status"].ToString(), twofa = new_credentials["twofa"].ToString(), id_credential = new_credentials["id_credential"].ToString() });
-                    entities.SaveChanges();
-                    credentialsResponse = new_credentials.ToString();
+                    Paybook paybook = new Paybook();
+                    JObject new_credentials = paybook.credentials(credentials);
+
+                    if (new_credentials != null)
+                    {
+                        entities.credentials.Add(new EFModels.credentials { id_user = user.id_user, id_site = id_site, ws = new_credentials["ws"].ToString(), status = new_credentials["status"].ToString(), twofa = new_credentials["twofa"].ToString(), id_credential = new_credentials["id_credential"].ToString() });
+                        entities.SaveChanges();
+                        credentialsResponse = new_credentials.ToString();
+                    }
                 }
             }
-
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
             JToken json = JObject.Parse("{ 'credentials' : '" + credentialsResponse + "' }");
             return new HttpResponseMessage()
             {
@@ -50,20 +56,25 @@ namespace pb_net_api.Controllers
         public HttpResponseMessage Status(string token, string id_site)
         {
             string status = "false";
-            
-            PayBookEntities entities = new PayBookEntities();
-
-            var user = entities.users.FirstOrDefault(u => u.token == token);
-
-            if (user != null)
+            try
             {
-                var credentials = entities.credentials.FirstOrDefault(c => c.id_user == user.id_user && c.id_site == id_site);
-                string url_status = credentials.status;
+                PayBookEntities entities = new PayBookEntities();
 
-                Paybook paybook = new Paybook();
-                status = paybook.status(token, id_site, url_status);
+                var user = entities.users.FirstOrDefault(u => u.token == token);
+
+                if (user != null)
+                {
+                    var credentials = entities.credentials.FirstOrDefault(c => c.id_user == user.id_user && c.id_site == id_site);
+                    string url_status = credentials.status;
+
+                    Paybook paybook = new Paybook();
+                    status = paybook.status(token, id_site, url_status);
+                }
             }
-
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
             JToken json = JObject.Parse("{ 'status' : '" + status + "' }");
             return new HttpResponseMessage()
             {
